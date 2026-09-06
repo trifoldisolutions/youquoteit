@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/output.css">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 p-6">
+  <div class="max-w-2xl mx-auto flex flex-col gap-6">
+    <h1 class="text-2xl font-bold">Internal Task Board</h1>
+
+    <form method="POST" action="/dev-resources/tasks" class="bg-white p-4 rounded shadow flex flex-col gap-3">
+      <input type="text" name="title" placeholder="Task title" required class="border border-slate-300 rounded px-3 py-2">
+      <textarea name="description" placeholder="Description" class="border border-slate-300 rounded px-3 py-2"></textarea>
+      <button type="submit" class="self-start px-4 py-2 rounded bg-slate-900 text-white">Add Task</button>
+    </form>
+
+    <div class="flex flex-col gap-3">
+      <% tasks.forEach(function(task) { %>
+        <div class="bg-white p-4 rounded shadow flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold"><%= task.title %></span>
+            <span class="text-xs uppercase tracking-wide px-2 py-1 rounded bg-slate-100 text-slate-600"><%= task.status %></span>
+          </div>
+          <% if (task.description) { %>
+            <p class="text-slate-600 text-sm"><%= task.description %></p>
+          <% } %>
+
+          <details class="text-sm">
+            <summary class="cursor-pointer text-slate-500">Edit</summary>
+            <form method="POST" action="/dev-resources/tasks/<%= task._id %>/update" class="flex flex-col gap-2 mt-2">
+              <input type="text" name="title" value="<%= task.title %>" required class="border border-slate-300 rounded px-3 py-2">
+              <textarea name="description" class="border border-slate-300 rounded px-3 py-2"><%= task.description %></textarea>
+              <select name="status" class="border border-slate-300 rounded px-3 py-2">
+                <option value="todo" <%= task.status === 'todo' ? 'selected' : '' %>>todo</option>
+                <option value="in-progress" <%= task.status === 'in-progress' ? 'selected' : '' %>>in-progress</option>
+                <option value="done" <%= task.status === 'done' ? 'selected' : '' %>>done</option>
+              </select>
+              <button type="submit" class="self-start px-3 py-1.5 rounded bg-slate-900 text-white">Save</button>
+            </form>
+          </details>
+
+          <form method="POST" action="/dev-resources/tasks/<%= task._id %>/delete">
+            <button type="submit" class="text-red-600 text-sm self-start">Delete</button>
+          </form>
+        </div>
+      <% }); %>
+
+      <% if (tasks.length === 0) { %>
+        <p class="text-slate-500 text-sm">No tasks yet.</p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>
