@@ -30,16 +30,47 @@
     });
   }
 
+  // Rough QWERTY adjacency, used to fabricate a plausible "fat-finger" typo
+  // instead of a random unrelated letter.
+  var QWERTY_NEIGHBORS = {
+    a: 'sqz', b: 'vghn', c: 'xdfv', d: 'serfcx', e: 'wsdr', f: 'drtgvc',
+    g: 'ftyhbv', h: 'gyujnb', i: 'ujko', j: 'huikmn', k: 'jiolm', l: 'kop',
+    m: 'njk', n: 'bhjm', o: 'iklp', p: 'ol', q: 'wa', r: 'edft', s: 'awedxz',
+    t: 'rfgy', u: 'yhji', v: 'cfgb', w: 'qase', x: 'zsdc', y: 'tghu', z: 'asx'
+  };
+
+  function randomTypoChar(ch) {
+    var lower = ch.toLowerCase();
+    var neighbors = QWERTY_NEIGHBORS[lower];
+    var pick = neighbors
+      ? neighbors.charAt(Math.floor(Math.random() * neighbors.length))
+      : 'aeiou'.charAt(Math.floor(Math.random() * 5));
+    return ch === lower ? pick : pick.toUpperCase();
+  }
+
   // Reveals/removes text via textContent slicing so the browser's own line
   // wrapping is used — no per-letter <span> elements to fight with.
   function Typewriter(el, opts) {
     this.el = el;
     this.speed = (opts && opts.speed) || 32;
     this.jitter = (opts && opts.jitter) || 16;
+    // Per-quote odds of throwing in one thinking-pause and/or one fat-finger
+    // typo that gets noticed, backspaced, and corrected — so most quotes
+    // type cleanly but every so often one feels a little more human.
+    this.pauseChance = (opts && opts.pauseChance != null) ? opts.pauseChance : 0.35;
+    this.typoChance = (opts && opts.typoChance != null) ? opts.typoChance : 0.25;
     this.timer = null;
     this.erasing = false;
     this.erasingFullText = ''; // what an in-flight erase started from, for reverseErase()
   }
+
+  // Backspacing is still quicker than typing, but not a flat, jitter-free
+  // sprint — that read as the animation "rushing to catch up" right after
+  // a pause, or as a blur whenever erasing collapsed the text across a
+  // line break. A little variance keeps it closer to an actual backspace.
+  Typewriter.prototype.eraseDelay = function () {
+    return this.speed * 0.65 + Math.random() * this.jitter * 0.5;
+  };
 
   Typewriter.prototype.type = function (text, onDone) {
     var self = this;
@@ -49,12 +80,52 @@
     this.el.classList.remove('is-done');
     this.el.classList.add('is-typing');
 
+    // Roll once per quote for where (if anywhere) a pause or typo lands,
+    // rather than checking odds on every single keystroke.
+    function pickSpot() {
+      return 2 + Math.floor(Math.random() * (text.length - 3));
+    }
+    var typoPos = (text.length > 6 && Math.random() < self.typoChance) ? pickSpot() : -1;
+    var wrongChar = '';
+    // The typo isn't caught the instant it's typed — a few more (correct)
+    // characters go down first, same as a real typo, before it's noticed.
+    var noticePos = -1;
+    if (typoPos > 0) {
+      noticePos = Math.min(typoPos + 2 + Math.floor(Math.random() * 4), text.length - 1);
+      if (noticePos <= typoPos) typoPos = -1; // not enough room left to sell the effect
+    }
+    var typoPhase = typoPos > 0 ? 1 : 0; // 1 = typo pending/active, 2 = already fixed
+
+    var pauseAt = (text.length > 6 && Math.random() < self.pauseChance) ? pickSpot() : -1;
+    // Don't let the thinking-pause land inside the typo's unnoticed stretch.
+    if (typoPos > 0 && pauseAt >= typoPos && pauseAt <= noticePos) pauseAt = -1;
+
     var i = 0;
     function step() {
       i += 1;
+
+      if (typoPhase === 1 && i === typoPos) {
+        wrongChar = randomTypoChar(text.charAt(i - 1));
+        self.el.textContent = text.slice(0, i - 1) + wrongChar;
+        self.timer = setTimeout(step, self.speed + Math.random() * self.jitter);
+        return;
+      }
+
+      if (typoPhase === 1 && i > typoPos) {
+        self.el.textContent = text.slice(0, typoPos - 1) + wrongChar + text.slice(typoPos, i);
+        if (i === noticePos) {
+          // Beat of "hm, that's wrong" before backspacing to the mistake.
+          self.timer = setTimeout(eraseToTypo, 700 + Math.random() * 400);
+          return;
+        }
+        self.timer = setTimeout(step, self.speed + (Math.random() * self.jitter - self.jitter / 2));
+        return;
+      }
+
       self.el.textContent = text.slice(0, i);
       if (i < text.length) {
         var delay = self.speed + (Math.random() * self.jitter - self.jitter / 2);
+        if (i === pauseAt) delay += 350 + Math.random() * 500;
         self.timer = setTimeout(step, delay);
       } else {
         self.timer = null;
@@ -63,6 +134,28 @@
         if (onDone) onDone();
       }
     }
+
+    // Backspaces from the notice point all the way back to (and including)
+    // the wrong character, then hands off to step() to retype the fixed
+    // character and continue on from there — catching back up to where it
+    // had actually gotten to.
+    function eraseToTypo() {
+      var j = i;
+      function eraseStep() {
+        j -= 1;
+        if (j >= typoPos) {
+          self.el.textContent = text.slice(0, typoPos - 1) + wrongChar + text.slice(typoPos, j);
+          self.timer = setTimeout(eraseStep, self.eraseDelay());
+        } else {
+          self.el.textContent = text.slice(0, typoPos - 1);
+          i = typoPos - 1;
+          typoPhase = 2;
+          self.timer = setTimeout(step, self.speed + Math.random() * self.jitter);
+        }
+      }
+      self.timer = setTimeout(eraseStep, self.eraseDelay());
+    }
+
     self.timer = setTimeout(step, 120);
   };
 
@@ -88,7 +181,7 @@
       i -= 1;
       self.el.textContent = text.slice(0, Math.max(i, 0));
       if (i > 0) {
-        self.timer = setTimeout(step, self.speed / 2);
+        self.timer = setTimeout(step, self.eraseDelay());
       } else {
         self.timer = null;
         self.erasing = false;
@@ -99,7 +192,7 @@
         if (onDone) onDone();
       }
     }
-    self.timer = setTimeout(step, self.speed / 2);
+    self.timer = setTimeout(step, self.eraseDelay());
   };
 
   // Reverses an in-flight erase: stops erasing further and types the
@@ -190,6 +283,7 @@
     var authorRowEl = document.getElementById('quote-author-row');
     var statsEl = document.getElementById('quote-stats');
     var authorEl = document.getElementById('quote-author');
+    var authorMetaEl = document.getElementById('quote-author-meta');
     var likesEl = document.getElementById('quote-likes');
     var commentsEl = document.getElementById('quote-comments');
     var screenshotsEl = document.getElementById('quote-screenshots');
@@ -242,6 +336,8 @@
 
     function renderMeta(quote) {
       authorEl.textContent = quote.author || '';
+      authorMetaEl.textContent = formatCompact(quote.authorQuoteCount) + ' quotes • ' +
+        formatCompact(quote.authorAppreciations) + ' appreciations';
       likesEl.textContent = formatCompact(quote.likes);
       commentsEl.textContent = formatCompact(quote.comments);
       screenshotsEl.textContent = formatCompact(quote.screenshots);
@@ -332,14 +428,16 @@
     initLoopButton();
     showQuote(index);
 
-    // Repeat-one toggle: an accent-colored icon plus a small corner dot
-    // mark the active state (no distinct "off" glyph exists in this icon
-    // set for it), matching how the like icon reads active via color
-    // rather than a swap.
+    // Repeat-one toggle: the solid icon variant, an accent color and a
+    // small corner dot together mark the active state.
     function initLoopButton() {
       var btn = document.getElementById('loop-btn');
+      var icon = document.getElementById('loop-icon');
       var dot = document.getElementById('loop-dot');
       if (!btn) return;
+
+      var LOOP_ICON = 'mynaui:repeat';
+      var LOOP_ICON_ACTIVE = 'mynaui:repeat-solid';
 
       btn.addEventListener('click', function () {
         loopCurrent = !loopCurrent;
@@ -347,6 +445,7 @@
         btn.setAttribute('aria-label', loopCurrent ? 'Stop repeating this quote' : 'Repeat this quote');
         btn.classList.toggle('text-accent-500', loopCurrent);
         btn.classList.toggle('text-ink', !loopCurrent);
+        if (icon) icon.setAttribute('icon', loopCurrent ? LOOP_ICON_ACTIVE : LOOP_ICON);
         if (dot) dot.classList.toggle('opacity-0', !loopCurrent);
       });
     }
@@ -506,7 +605,7 @@
     var quotes = [];
     try { quotes = (dataScript && JSON.parse(dataScript.textContent)) || []; } catch (e) {}
 
-    var CAMERA_ICON = 'mynaui:image-solid';
+    var CAMERA_ICON = 'mynaui:camera';
     var SPINNER_ICON = 'svg-spinners:6-dots-scale-middle';
     var EXPORT_SIZE = 1080;
     // The live quote-text size is a vw-based clamp() — vw resolves against
@@ -529,29 +628,6 @@
         child.style.verticalAlign = 'middle';
         if (i > 0 && gapPx) child.style.marginLeft = gapPx + 'px';
       });
-    }
-
-    // For the author row specifically: inline vertical-align:middle (centers
-    // against the ambient font's baseline/x-height), table-cell
-    // vertical-align:middle (centers against the row's computed height) and
-    // top:50%/translateY(-50%) (same, via transform) all still left the rule
-    // sitting high — every one of them centers against some *computed* row
-    // height that isn't matching the name text's actual visual center.
-    // Pulling the rule out of flow here only sets up left/marginLeft; the
-    // vertical position gets pinned separately, in pixels, once the clone is
-    // attached to the document and its real layout can be measured directly
-    // — see the getBoundingClientRect step below, right after appendChild.
-    function centerAuthorRow(row, ruleWidthPx, gapPx) {
-      if (!row) return;
-      var rule = row.children[0];
-      var name = row.children[1];
-      if (!rule || !name) return;
-      row.style.display = 'block';
-      row.style.position = 'relative';
-      name.style.display = 'inline-block';
-      name.style.marginLeft = (ruleWidthPx + gapPx) + 'px';
-      rule.style.position = 'absolute';
-      rule.style.left = '0';
     }
 
     // <iconify-icon> renders its SVG into a shadow root, which cloneNode()
@@ -658,6 +734,11 @@
         if (textClone) textClone.textContent = exportQuote.text;
         var authorTextClone = contentClone.querySelector('#quote-author');
         if (authorTextClone) authorTextClone.textContent = exportQuote.author || '';
+        var authorMetaClone = contentClone.querySelector('#quote-author-meta');
+        if (authorMetaClone) {
+          authorMetaClone.textContent = formatCompact(exportQuote.authorQuoteCount) + ' quotes • ' +
+            formatCompact(exportQuote.authorAppreciations) + ' appreciations';
+        }
         var viewsClone = contentClone.querySelector('#quote-views');
         var likesClone = contentClone.querySelector('#quote-likes');
         var commentsClone = contentClone.querySelector('#quote-comments');
@@ -668,14 +749,12 @@
         if (screenshotsClone) screenshotsClone.textContent = formatCompact(exportQuote.screenshots);
       }
       inlineIcons(contentEl, contentClone);
-      // Author row: measured from the live rule/row rather than hardcoded,
-      // so this keeps working if the rule's width or the row's gap ever
-      // change in the markup/CSS.
+      // Author row: avatar circle next to the name/meta stack — same
+      // inline-block + vertical-align:middle centering as the stats row,
+      // since html2canvas's flexbox cross-axis centering can't be trusted.
       if (authorClone) {
-        var liveRule = authorRowEl.children[0];
-        var ruleWidthPx = liveRule ? liveRule.getBoundingClientRect().width : 120;
-        var rowGapPx = parseFloat(window.getComputedStyle(authorRowEl).columnGap) || 16;
-        centerAuthorRow(authorClone, ruleWidthPx, rowGapPx);
+        var rowGapPx = parseFloat(window.getComputedStyle(authorRowEl).columnGap) || 12;
+        centerRowChildren(authorClone, rowGapPx);
       }
       // Each stat's icon+number pair first (6px gap), then the row of
       // stats itself (16px gap) — inner before outer, so the outer
