@@ -1,17 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="daylight">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="/output.css">
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center gap-4">
-  <h1 class="text-3xl font-bold">App</h1>
-  <p class="text-slate-600">App index placeholder.</p>
-  <div class="flex gap-3">
-    <a href="/app/login" class="px-4 py-2 rounded bg-slate-900 text-white">Log In / Sign Up</a>
-    <a href="/app/quotes" class="px-4 py-2 rounded border border-slate-300">Quotes</a>
+<body class="font-sans antialiased overflow-hidden">
+  <div id="quote-stage" class="quote-stage--fallback relative flex h-screen w-screen flex-col">
+
+    <!-- HEADER -->
+    <header class="relative z-10 grid grid-cols-3 items-center px-6 py-5 sm:px-10">
+      <div></div>
+
+      <div id="brand-name" class="justify-self-center">
+        <span class="font-display text-xl text-accent-500 sm:text-2xl">YouQuoteIt<span class="text-ink">.</span></span>
+      </div>
+
+      <div id="header-actions" class="flex items-center gap-3 justify-self-end">
+        <button type="button"
+          class="grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-surface-soft/70 text-ink-soft backdrop-blur transition hover:text-ink"
+          aria-label="Your profile">
+          <iconify-icon icon="mynaui:user-circle-solid" width="22"></iconify-icon>
+        </button>
+        <button type="button" id="menu-btn"
+          class="grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-surface-soft/70 text-ink-soft backdrop-blur transition hover:text-ink"
+          aria-label="Open menu">
+          <iconify-icon icon="mynaui:menu" width="22"></iconify-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="relative z-10 flex flex-1 items-center justify-center px-6 sm:px-12">
+      <div id="quote-content" class="flex w-full max-w-6xl flex-col items-center gap-8 text-center">
+        <div id="quote-author-row" class="flex items-center gap-4 opacity-0">
+          <span class="h-0.5 w-30 bg-current opacity-40"></span>
+          <span id="quote-author" class="font-sans text-xl font-bold tracking-wide text-accent-500 sm:text-2xl"></span>
+        </div>
+
+        <p id="quote-text" class="typewriter font-display leading-tight" style="font-size: clamp(2.25rem, 5.25vw, 4.25rem);"></p>
+
+        <div id="quote-stats" class="flex items-center gap-4 text-ink-soft opacity-0">
+          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Views">
+            <iconify-icon icon="mynaui:eye" width="18"></iconify-icon>
+            <span id="quote-views" class="text-sm font-medium"></span>
+          </button>
+          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Like">
+            <iconify-icon icon="mynaui:heart" width="18" class="text-accent-500"></iconify-icon>
+            <span id="quote-likes" class="text-sm font-medium"></span>
+          </button>
+          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Comments">
+            <iconify-icon icon="mynaui:message-dots" width="18"></iconify-icon>
+            <span id="quote-comments" class="text-sm font-medium"></span>
+          </button>
+          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Screenshots">
+            <iconify-icon icon="mynaui:camera" width="18"></iconify-icon>
+            <span id="quote-screenshots" class="text-sm font-medium"></span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="quote-footer" class="relative z-10 flex items-center justify-center gap-2 px-6 py-6 sm:px-10">
+      <button type="button" id="loop-btn"
+        class="relative grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Repeat this quote" aria-pressed="false">
+        <iconify-icon id="loop-icon" icon="mynaui:repeat" width="16"></iconify-icon>
+        <span id="loop-dot" class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-accent-500 opacity-0 transition"></span>
+      </button>
+
+      <span class="mx-1 h-5 w-px bg-ink/15" aria-hidden="true"></span>
+
+      <button type="button" id="prev-quote-btn"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Previous quote">
+        <iconify-icon id="prev-quote-icon" icon="mynaui:skip-back-solid" width="16"></iconify-icon>
+      </button>
+
+      <button type="button" id="play-toggle-btn"
+        class="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Stop" aria-pressed="true">
+        <iconify-icon id="play-toggle-icon" icon="mynaui:stop-solid" width="18"></iconify-icon>
+      </button>
+
+      <button type="button" id="next-quote-btn"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Next quote">
+        <iconify-icon id="next-quote-icon" icon="mynaui:skip-forward-solid" width="16"></iconify-icon>
+      </button>
+
+      <span class="mx-1 h-5 w-px bg-ink/15" aria-hidden="true"></span>
+
+      <button type="button" id="screenshot-btn"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Save quote as image">
+        <iconify-icon id="screenshot-icon" icon="mynaui:image-solid" width="16"></iconify-icon>
+      </button>
+
+      <button type="button" id="fullscreen-btn"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        aria-label="Enter fullscreen" aria-pressed="false">
+        <iconify-icon id="fullscreen-icon" icon="mynaui:maximize" width="16"></iconify-icon>
+      </button>
+    </footer>
   </div>
+
+  <script type="application/json" id="quotes-data"><%- JSON.stringify(quotes) %></script>
+  <script src="/js/app.js" defer></script>
 </body>
 </html>
