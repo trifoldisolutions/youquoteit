@@ -2,182 +2,83 @@
 
 @theme inline {
   --color-surface: var(--yqi-surface);
-  --color-surface-soft: var(--yqi-surface-soft);
   --color-ink: var(--yqi-ink);
-  --color-ink-soft: var(--yqi-ink-soft);
-
-  --color-accent-50: var(--yqi-accent-50);
-  --color-accent-100: var(--yqi-accent-100);
-  --color-accent-200: var(--yqi-accent-200);
-  --color-accent-300: var(--yqi-accent-300);
-  --color-accent-400: var(--yqi-accent-400);
-  --color-accent-500: var(--yqi-accent-500);
-  --color-accent-600: var(--yqi-accent-600);
-  --color-accent-700: var(--yqi-accent-700);
-  --color-accent-800: var(--yqi-accent-800);
-  --color-accent-900: var(--yqi-accent-900);
-  --color-accent-950: var(--yqi-accent-950);
+  --color-accent: var(--yqi-accent);
 
   --font-display: "Kaushan Script", cursive;
   --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ---------- Themes ---------- */
-/* Each theme sets: surface (page bg), surface-soft (cards/panels),
-   ink (primary text), ink-soft (secondary text) and an 11-step
-   accent scale used for links, buttons, the like icon, etc. */
+/* Sourced from src/themes.json — each theme is exactly 3 tokens:
+   background (page bg), ink (text) and accent (author name, brand
+   dot, likes, etc.). Muted/secondary text is a plain rgba() built from
+   the *-rgb triplet below, not a Tailwind opacity modifier — see the
+   "Muted variants" section for why. */
 
 :root,
-[data-theme="daylight"] {
+[data-theme="default"] {
   --yqi-surface: #f8f8f8;
-  --yqi-surface-soft: #ffffff;
-  --yqi-ink: #14151a;
-  --yqi-ink-soft: #55596b;
-
-  --yqi-accent-50: #f2f7fb;
-  --yqi-accent-100: #e6f0f7;
-  --yqi-accent-200: #c0d8ec;
-  --yqi-accent-300: #94bedf;
-  --yqi-accent-400: #4d93c9;
-  --yqi-accent-500: #0164b2;
-  --yqi-accent-600: #015597;
-  --yqi-accent-700: #01467d;
-  --yqi-accent-800: #013762;
-  --yqi-accent-900: #002847;
-  --yqi-accent-950: #00192d;
-}
-
-[data-theme="midnight"] {
-  --yqi-surface: #0a0a0a;
-  --yqi-surface-soft: #161616;
-  --yqi-ink: #f5f7fa;
-  --yqi-ink-soft: #9ca3af;
-
-  --yqi-accent-50: #f5f9fc;
-  --yqi-accent-100: #eaf2f9;
-  --yqi-accent-200: #cbe0f0;
-  --yqi-accent-300: #a7cae5;
-  --yqi-accent-400: #6da7d4;
-  --yqi-accent-500: #2e81c1;
-  --yqi-accent-600: #276ea4;
-  --yqi-accent-700: #205a87;
-  --yqi-accent-800: #19476a;
-  --yqi-accent-900: #12344d;
-  --yqi-accent-950: #0c2030;
-}
-
-[data-theme="ember"] {
-  --yqi-surface: #45462a;
-  --yqi-surface-soft: #52532f;
-  --yqi-ink: #fbf3e1;
-  --yqi-ink-soft: #c9c6a9;
-
-  --yqi-accent-50: #fefbf2;
-  --yqi-accent-100: #fdf6e6;
-  --yqi-accent-200: #fbe9bf;
-  --yqi-accent-300: #f8da94;
-  --yqi-accent-400: #f4c24d;
-  --yqi-accent-500: #efa800;
-  --yqi-accent-600: #cb8f00;
-  --yqi-accent-700: #a77600;
-  --yqi-accent-800: #835c00;
-  --yqi-accent-900: #604300;
-  --yqi-accent-950: #3c2a00;
-}
-
-[data-theme="dawn"] {
-  --yqi-surface: #ffe8cc;
-  --yqi-surface-soft: #fff4e3;
-  --yqi-ink: #2b2140;
-  --yqi-ink-soft: #6b5f80;
-
-  --yqi-accent-50: #f7f8fe;
-  --yqi-accent-100: #eff2fe;
-  --yqi-accent-200: #d8defc;
-  --yqi-accent-300: #bdc7fa;
-  --yqi-accent-400: #91a1f7;
-  --yqi-accent-500: #6279f4;
-  --yqi-accent-600: #5367cf;
-  --yqi-accent-700: #4555ab;
-  --yqi-accent-800: #364386;
-  --yqi-accent-900: #273062;
-  --yqi-accent-950: #191e3d;
-}
-
-[data-theme="candy"] {
-  --yqi-surface: #ddf9ff;
-  --yqi-surface-soft: #f0fdff;
-  --yqi-ink: #123840;
-  --yqi-ink-soft: #4c7480;
-
-  --yqi-accent-50: #fff6fc;
-  --yqi-accent-100: #ffedfa;
-  --yqi-accent-200: #ffd2f2;
-  --yqi-accent-300: #ffb3ea;
-  --yqi-accent-400: #ff80db;
-  --yqi-accent-500: #ff4acc;
-  --yqi-accent-600: #d93fad;
-  --yqi-accent-700: #b3348f;
-  --yqi-accent-800: #8c2970;
-  --yqi-accent-900: #661e52;
-  --yqi-accent-950: #401333;
-}
-
-[data-theme="mono"] {
-  --yqi-surface: #f8f8f8;
-  --yqi-surface-soft: #ffffff;
+  --yqi-surface-rgb: 248, 248, 248;
   --yqi-ink: #090909;
-  --yqi-ink-soft: #6b7280;
-
-  --yqi-accent-50: #f5f5f6;
-  --yqi-accent-100: #ececed;
-  --yqi-accent-200: #cfcfd1;
-  --yqi-accent-300: #aeaeb1;
-  --yqi-accent-400: #79797e;
-  --yqi-accent-500: #3f3f46;
-  --yqi-accent-600: #36363c;
-  --yqi-accent-700: #2c2c31;
-  --yqi-accent-800: #232327;
-  --yqi-accent-900: #19191c;
-  --yqi-accent-950: #101012;
+  --yqi-ink-rgb: 9, 9, 9;
+  --yqi-accent: #0064b2;
 }
 
-[data-theme="harbor"] {
-  --yqi-surface: #0b3953;
-  --yqi-surface-soft: #123f5c;
-  --yqi-ink: #eaf6ff;
-  --yqi-ink-soft: #8fb4c7;
-
-  --yqi-accent-50: #fefbf2;
-  --yqi-accent-100: #fdf6e6;
-  --yqi-accent-200: #fbe9bf;
-  --yqi-accent-300: #f8da94;
-  --yqi-accent-400: #f4c24d;
-  --yqi-accent-500: #efa800;
-  --yqi-accent-600: #cb8f00;
-  --yqi-accent-700: #a77600;
-  --yqi-accent-800: #835c00;
-  --yqi-accent-900: #604300;
-  --yqi-accent-950: #3c2a00;
+[data-theme="dark_default"] {
+  --yqi-surface: #090909;
+  --yqi-surface-rgb: 9, 9, 9;
+  --yqi-ink: #f8f8f8;
+  --yqi-ink-rgb: 248, 248, 248;
+  --yqi-accent: #0064b2;
 }
 
-[data-theme="forest"] {
-  --yqi-surface: #141414;
-  --yqi-surface-soft: #1c1c1c;
-  --yqi-ink: #eafbf1;
-  --yqi-ink-soft: #7fa98f;
+[data-theme="buttercup"] {
+  --yqi-surface: #0e1600;
+  --yqi-surface-rgb: 14, 22, 0;
+  --yqi-ink: #efa800;
+  --yqi-ink-rgb: 239, 168, 0;
+  --yqi-accent: #f1001f;
+}
 
-  --yqi-accent-50: #f7fbf9;
-  --yqi-accent-100: #eff8f3;
-  --yqi-accent-200: #d7ede1;
-  --yqi-accent-300: #bce1cd;
-  --yqi-accent-400: #8fcdab;
-  --yqi-accent-500: #5fb887;
-  --yqi-accent-600: #519c73;
-  --yqi-accent-700: #43815f;
-  --yqi-accent-800: #34654a;
-  --yqi-accent-900: #264a36;
-  --yqi-accent-950: #182e22;
+[data-theme="royal"] {
+  --yqi-surface: #fff0dd;
+  --yqi-surface-rgb: 255, 240, 221;
+  --yqi-ink: #6279f4;
+  --yqi-ink-rgb: 98, 121, 244;
+  --yqi-accent: #2ec1b8;
+}
+
+[data-theme="dazzle"] {
+  --yqi-surface: #ddf9ff;
+  --yqi-surface-rgb: 221, 249, 255;
+  --yqi-ink: #ff4acc;
+  --yqi-ink-rgb: 255, 74, 204;
+  --yqi-accent: #6d85ff;
+}
+
+[data-theme="blackn"] {
+  --yqi-surface: #090909;
+  --yqi-surface-rgb: 9, 9, 9;
+  --yqi-ink: #f8f8f8;
+  --yqi-ink-rgb: 248, 248, 248;
+  --yqi-accent: #353434;
+}
+
+[data-theme="aqua"] {
+  --yqi-surface: #01111b;
+  --yqi-surface-rgb: 1, 17, 27;
+  --yqi-ink: #00f0ff;
+  --yqi-ink-rgb: 0, 240, 255;
+  --yqi-accent: #e98607;
+}
+
+[data-theme="watermelon"] {
+  --yqi-surface: #181818;
+  --yqi-surface-rgb: 24, 24, 24;
+  --yqi-ink: #5fb887;
+  --yqi-ink-rgb: 95, 184, 135;
+  --yqi-accent: #ff196c;
 }
 
 /* ---------- Base ---------- */
@@ -185,10 +86,11 @@
 html {
   color-scheme: light;
 }
-[data-theme="midnight"],
-[data-theme="ember"],
-[data-theme="harbor"],
-[data-theme="forest"] {
+[data-theme="dark_default"],
+[data-theme="buttercup"],
+[data-theme="blackn"],
+[data-theme="aqua"],
+[data-theme="watermelon"] {
   color-scheme: dark;
 }
 
@@ -204,13 +106,202 @@ body {
   background-color: var(--color-surface);
 }
 
+/* A quote's per-theme ink/accent colors are tuned for that theme's flat
+   surface color, not for an arbitrary user-uploaded photo — the dark
+   gradient overlay in applyBackground()/applyPreviewBackground() (app.js)
+   alone isn't a reliable contrast guarantee against every possible image.
+   Once a background photo is active (the `on-bg-image` class, toggled
+   alongside quote-stage--fallback), force plain white text with a shadow
+   instead, the same "photo mode" treatment most quote-card apps use —
+   applies identically to the real quote stage and the create-quote
+   preview so the two keep looking alike.
+   Scoped as `#quote-stage.on-bg-image`/`#cq-preview.on-bg-image` rather
+   than a bare `.on-bg-image` — the create-quote preview lives *inside*
+   #quote-stage in the DOM, so a bare `.on-bg-image #cq-preview-text`
+   would also match whenever the live stage behind the modal has its own
+   photo active, even while the preview itself is showing no image at
+   all (plain surface, forced-white text on it — invisible). Each side
+   needs to react only to its own on-bg-image, not either one's. */
+#quote-stage.on-bg-image #quote-text,
+#quote-stage.on-bg-image #quote-author,
+#quote-stage.on-bg-image #quote-author-meta,
+#quote-stage.on-bg-image #quote-stats,
+#quote-stage.on-bg-image #quote-footer,
+#cq-preview.on-bg-image #cq-preview-text,
+#cq-preview.on-bg-image #cq-preview-author,
+#cq-preview.on-bg-image #cq-preview-author-meta,
+#cq-preview.on-bg-image #cq-preview-stats {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Same idea, applied to the chips' own fill: bg-surface-70 reads the active
+   theme's flat surface color, which was tuned to sit on that theme's flat
+   background — not to sit on top of an arbitrary photo, where a dark-theme
+   surface color just reads as a solid dark box instead of glass. In photo
+   mode these get a theme-independent frosted look instead. Scoped per side
+   for the same reason as the block above. */
+#quote-stage.on-bg-image #quote-vote,
+#cq-preview.on-bg-image #cq-preview-vote,
+#quote-stage.on-bg-image #quote-comment-btn,
+#cq-preview.on-bg-image #cq-preview-comments,
+#quote-stage.on-bg-image #quote-menu-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+}
+#quote-stage.on-bg-image #quote-vote,
+#cq-preview.on-bg-image #cq-preview-vote,
+#cq-preview.on-bg-image #cq-preview-comments {
+  border-color: transparent;
+}
+
+/* create-quote-btn is a solid bg-ink/text-surface fill rather than a
+   glass chip, so it isn't covered by the frosted-glass rule above — but
+   it's just as unguaranteed against an arbitrary photo: on-theme "ink"
+   can land anywhere from near-black to near-white, and a solid square
+   that color can vanish into a similarly dark (or light) photo. Same
+   frosted-glass fallback in photo mode, same reason. The border is the
+   part doing the real work over a flat, featureless patch of photo (a
+   night sky, a plain wall) — backdrop-blur has no detail to blur there,
+   so the tint alone all but disappears and the button would have no
+   visible edge at all without it. No #cq-preview counterpart exists (the
+   create-quote modal has no FAB of its own), so this only needs the
+   #quote-stage scope, not the paired scoping above. */
+#quote-stage.on-bg-image #create-quote-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* Smart contrast: app.js (updateCreateBtnContrast) samples the actual
+   composited pixels behind this button and adds this class when that
+   corner reads light rather than dark — the white-on-white glass above
+   would otherwise wash out against a bright patch of photo (snow, sky). */
+#quote-stage.on-bg-image #create-quote-btn.is-over-light-bg {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.28));
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  color: #111;
+}
+
+/* blackn only: its accent (#353434 on a #090909 bg) is too low-contrast
+   for the brand dot to read as an accent, so the brand name there is
+   muted to match the other secondary text instead of full ink. Scoped
+   to this one theme, not a general rule for every theme's brand name. */
+[data-theme="blackn"] #brand-name {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+
+/* Same photo-mode treatment as the quote text/stats above, extended to the
+   brand mark — its accent-dot styling (text-accent on the "Quote" span)
+   isn't any more guaranteed to read against an arbitrary photo than the
+   flat ink colors were, so force the whole mark to plain white+shadow too.
+   Scoped to #quote-stage (see the block near the top of this section) —
+   there's no #cq-preview counterpart, the modal has no brand mark of its
+   own. The span rule is needed because text-accent is a direct class on
+   that inner span — inheriting #fff from #brand-name alone can't beat a
+   rule that targets the span itself; placed after the blackn rule above,
+   and outranking it on specificity regardless of source order (two ids
+   here vs. one attribute + one id there), so a photo behind the brand
+   always beats blackn's normal muting. */
+#quote-stage.on-bg-image #brand-name,
+#quote-stage.on-bg-image #brand-name span {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* blackn only: keep the author meta line and stats row muted there,
+   even though every other theme now shows them at full ink. Scoped to
+   this one theme, not a rollback of the full-ink change elsewhere. */
+[data-theme="blackn"] #quote-author-meta,
+[data-theme="blackn"] #quote-stats,
+[data-theme="blackn"] #cq-preview-author-meta,
+[data-theme="blackn"] #cq-preview-stats {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+
+/* blackn only: dim the header's profile/menu buttons like the rest of
+   its muted secondary UI. Every other theme shows them at full ink.
+   The explicit :hover rule is needed because it must out-specificity
+   the base rule above (ID selector) to still brighten on hover. */
+[data-theme="blackn"] #header-actions button {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+[data-theme="blackn"] #header-actions button:hover {
+  color: var(--color-ink);
+}
+
+/* ---------- Muted variants ---------- */
+/* Tailwind's own opacity modifiers (ink at a percent opacity etc) compile to
+   color-mix(in oklab, ...) — which getComputedStyle serializes back as a
+   literal "oklab(...)" string, and html2canvas (public/js/app.js's
+   screenshot export) can't parse that and throws. Plain rgba() built from
+   the *-rgb triplets above always serializes as legacy rgba(), which every
+   tool understands, so these hand-written classes stand in for the
+   opacity-modifier utilities anywhere the screenshot export can see them. */
+.text-ink-60 {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+.bg-surface-70 {
+  background-color: rgba(var(--yqi-surface-rgb), 0.7);
+}
+.bg-ink-15 {
+  background-color: rgba(var(--yqi-ink-rgb), 0.15);
+}
+/* hover:bg-ink-15 is used on several buttons (vote pill, comment button,
+   the "more options" menu items) but Tailwind only compiles a `hover:`
+   variant for utilities it generates itself — bg-ink-15 is a hand-written
+   class above, so the variant needs its own hand-written rule too, or it
+   silently never matches anything. */
+.hover\:bg-ink-15:hover {
+  background-color: rgba(var(--yqi-ink-rgb), 0.15);
+}
+.border-ink-10 {
+  border-color: rgba(var(--yqi-ink-rgb), 0.1);
+}
+.ring-ink-10 {
+  --tw-ring-color: rgba(var(--yqi-ink-rgb), 0.1);
+}
+
+/* Comment composer textarea placeholder: needs a hand-written rule since
+   text-ink-60 above is plain CSS, not a Tailwind color token, so Tailwind
+   can't generate a `placeholder:text-ink-60` variant for it. */
+.comment-input-field::placeholder {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+
+/* Auth modal (sign up / log in) inputs: same reason as the comment
+   composer above — text-ink-60 is a hand-written class, not a Tailwind
+   color token, so there's no generated placeholder: variant for it. */
+.auth-input::placeholder {
+  color: rgba(var(--yqi-ink-rgb), 0.6);
+}
+
+/* Comments panel: a bottom sheet (slides up) on narrow screens, a
+   right-side drawer (slides in) from sm: up. app.js only ever toggles
+   the one `.is-open` class — which axis that animates is decided here,
+   per breakpoint, since combining Tailwind's translate-x/-y utilities
+   across a breakpoint reliably in one class list isn't straightforward. */
+#comments-panel {
+  transform: translateY(100%);
+}
+#comments-panel.is-open {
+  transform: translateY(0);
+}
+@media (min-width: 640px) {
+  #comments-panel {
+    transform: translateX(100%);
+  }
+  #comments-panel.is-open {
+    transform: translateX(0);
+  }
+}
+
 /* Theme switcher swatches: each button carries its own [data-theme], so it
    renders that theme's colors regardless of the page's active theme. */
 .theme-dot {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, var(--yqi-accent-500) 50%, var(--yqi-surface) 50%);
+  background: linear-gradient(135deg, var(--yqi-accent) 50%, var(--yqi-surface) 50%);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12) inset;
   transition: transform 150ms ease;
 }
@@ -218,7 +309,7 @@ body {
   transform: scale(1.15);
 }
 .theme-dot[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 0 4px var(--yqi-accent-500);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 0 4px var(--yqi-accent);
 }
 
 /* Typewriter */
@@ -229,8 +320,11 @@ body {
      resize between quotes. */
   transition: min-height 300ms ease;
 }
-.typewriter::after {
-  content: "";
+/* A real element (moved around in the DOM by JS to trail the last
+   revealed character) instead of a ::after pseudo-element, since every
+   character — including ones not yet revealed — now lives in the DOM
+   from the start (see the Typewriter comment in app.js). */
+.typewriter-caret {
   display: inline-block;
   width: 0.035em;
   height: 0.85em;
@@ -239,11 +333,11 @@ body {
   background: currentColor;
   opacity: 0;
 }
-.typewriter.is-typing::after {
+.typewriter.is-typing .typewriter-caret {
   opacity: 1;
   animation: yqi-caret-blink 0.85s steps(1) infinite;
 }
-.typewriter.is-done::after {
+.typewriter.is-done .typewriter-caret {
   opacity: 1;
   animation: yqi-caret-blink 1.1s steps(1) infinite;
 }
@@ -257,15 +351,45 @@ body {
   .typewriter {
     transition: none !important;
   }
-  .typewriter::after {
+  .typewriter-caret {
     animation: none !important;
   }
 }
 
-/* Zen mode: strips the UI down to the brand name, the author block and
-   the quote itself — header icons, the stats row and the
-   transport/save/fullscreen footer all disappear. Driven by the
-   `is-zen` class (set in app.js) rather than the `:fullscreen`
+/* Toast notifications: a bottom-center ribbon stack (#toast-container in
+   the view, built up in initToasts() in app.js). Each toast carries a thin
+   bar along its bottom edge that shrinks over its 8s lifetime; the timer
+   that actually dismisses the toast is JS (paused/resumed on
+   mouseenter/mouseleave), while this bar's own countdown "freezes" on
+   hover for free via animation-play-state below — both are driven by the
+   same hover, so they stay in sync without the two needing to coordinate. */
+.toast-progress {
+  animation-name: yqi-toast-countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  background-color: rgba(var(--yqi-ink-rgb), 0.25);
+}
+.toast:hover .toast-progress {
+  animation-play-state: paused;
+}
+@keyframes yqi-toast-countdown {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-progress {
+    animation: none !important;
+    opacity: 0;
+  }
+}
+
+/* Zen mode: strips the UI down to the brand name, the author's name and
+   the quote itself — header icons, the quote's stats row, the author's
+   quotes/appreciations line, and the transport/save footer buttons all
+   disappear. The exit-fullscreen button stays put in its usual
+   bottom-center spot (the rest of the footer row just hides around it)
+   so there's always an on-screen way back out, not just Esc. Driven by
+   the `is-zen` class (set in app.js) rather than the `:fullscreen`
    pseudo-class directly, because the real Fullscreen API is blocked in
    plenty of real contexts (embedded/iframe previews without the
    fullscreen permission, some in-app browsers) — `position: fixed`
@@ -278,6 +402,10 @@ body {
 }
 #quote-stage.is-zen #header-actions,
 #quote-stage.is-zen #quote-stats,
-#quote-stage.is-zen #quote-footer {
+#quote-stage.is-zen #quote-author-meta,
+#quote-stage.is-zen #create-quote-btn {
+  display: none;
+}
+#quote-stage.is-zen #quote-footer > *:not(#fullscreen-btn) {
   display: none;
 }

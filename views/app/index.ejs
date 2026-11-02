@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="daylight">
+<html lang="en" data-theme="default">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,104 +17,649 @@
   <div id="quote-stage" class="quote-stage--fallback relative flex h-screen w-screen flex-col">
 
     <!-- HEADER -->
-    <header class="relative z-10 grid grid-cols-3 items-center px-6 py-5 sm:px-10">
+    <header class="relative z-20 grid grid-cols-3 items-center px-6 py-5 sm:px-10">
       <div></div>
 
       <div id="brand-name" class="justify-self-center">
-        <span class="font-display text-xl text-accent-500 sm:text-2xl">YouQuoteIt<span class="text-ink">.</span></span>
+        <span class="font-display text-xl sm:text-2xl">You<span class="text-accent">Quote</span>It.</span>
       </div>
 
       <div id="header-actions" class="flex items-center gap-3 justify-self-end">
-        <button type="button"
-          class="grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-surface-soft/70 text-ink-soft backdrop-blur transition hover:text-ink"
-          aria-label="Your profile">
-          <iconify-icon icon="mynaui:user-circle-solid" width="22"></iconify-icon>
+        <button type="button" id="profile-btn"
+          class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-ink-10 bg-surface-70 text-ink backdrop-blur transition"
+          aria-label="Your profile" aria-haspopup="true" aria-expanded="false">
+          <iconify-icon icon="mynaui:user" width="22"></iconify-icon>
         </button>
         <button type="button" id="menu-btn"
-          class="grid h-10 w-10 place-items-center rounded-full border border-ink/10 bg-surface-soft/70 text-ink-soft backdrop-blur transition hover:text-ink"
-          aria-label="Open menu">
+          class="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-ink-10 bg-surface-70 text-ink backdrop-blur transition"
+          aria-label="Browse categories" aria-haspopup="true" aria-expanded="false">
           <iconify-icon icon="mynaui:menu" width="22"></iconify-icon>
         </button>
       </div>
     </header>
 
+    <!-- DEBUG: current quote's hashtags, for testing the pinned-categories
+         recommendation ranking (initQuoteDeck in public/js/app.js). Not
+         part of the real UI — remove once testing is done. -->
+    <div id="quote-debug-tags"
+      class="pointer-events-none absolute left-4 top-20 z-20 max-w-[70vw] select-none font-mono text-xs text-ink-60"></div>
+
     <!-- MAIN -->
     <main class="relative z-10 flex flex-1 items-center justify-center px-6 sm:px-12">
-      <div id="quote-content" class="flex w-full max-w-6xl flex-col items-center gap-8 text-center">
-        <div id="quote-author-row" class="flex items-center gap-4 opacity-0">
-          <span class="h-0.5 w-30 bg-current opacity-40"></span>
-          <span id="quote-author" class="font-sans text-xl font-bold tracking-wide text-accent-500 sm:text-2xl"></span>
+      <div id="quote-content" class="relative flex w-full max-w-7xl flex-col items-center text-center">
+        <div id="quote-author-row" class="absolute bottom-full left-1/2 mb-8 flex w-max -translate-x-1/2 items-center gap-3 opacity-0 transition select-none cursor-pointer">
+          <span id="quote-author-avatar" class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-surface text-ink-60 ring-1 ring-ink-10 sm:h-14 sm:w-14">
+            <iconify-icon icon="mynaui:user" width="26"></iconify-icon>
+          </span>
+          <div class="flex flex-col items-start text-left">
+            <span id="quote-author" class="font-display text-2xl text-accent sm:text-3xl"></span>
+            <span id="quote-author-meta" class="text-sm text-ink"></span>
+          </div>
         </div>
 
-        <p id="quote-text" class="typewriter font-display leading-tight" style="font-size: clamp(2.25rem, 5.25vw, 4.25rem);"></p>
+        <p id="quote-text" class="typewriter font-display leading-tight select-none cursor-default" style="font-size: clamp(2rem, 4.75vw, 3.75rem);"></p>
 
-        <div id="quote-stats" class="flex items-center gap-4 text-ink-soft opacity-0">
-          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Views">
-            <iconify-icon icon="mynaui:eye" width="18"></iconify-icon>
-            <span id="quote-views" class="text-sm font-medium"></span>
-          </button>
-          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Like">
-            <iconify-icon icon="mynaui:heart" width="18" class="text-accent-500"></iconify-icon>
-            <span id="quote-likes" class="text-sm font-medium"></span>
-          </button>
-          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Comments">
-            <iconify-icon icon="mynaui:message-dots" width="18"></iconify-icon>
+        <div id="quote-stats" class="absolute left-1/2 top-full mt-8 flex -translate-x-1/2 items-center gap-4 text-ink opacity-0 select-none cursor-default">
+          <div id="quote-vote" class="flex items-center overflow-hidden rounded-full border border-ink-10 bg-surface-70 backdrop-blur">
+            <button type="button" id="quote-like-btn"
+              class="flex cursor-pointer items-center gap-1.5 px-4 py-2 transition hover:bg-ink-15"
+              aria-label="Like this quote" aria-pressed="false">
+              <iconify-icon id="quote-like-icon" icon="mynaui:like" width="20"></iconify-icon>
+              <span id="quote-likes" class="text-sm font-medium"></span>
+            </button>
+            <span class="h-5 w-px bg-ink-15" aria-hidden="true"></span>
+            <button type="button" id="quote-dislike-btn"
+              class="flex cursor-pointer items-center px-4 py-2 transition hover:bg-ink-15"
+              aria-label="Dislike this quote" aria-pressed="false">
+              <iconify-icon id="quote-dislike-icon" icon="mynaui:dislike" width="20"></iconify-icon>
+            </button>
+          </div>
+          <button type="button" id="quote-comment-btn"
+            class="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface-70 px-4 py-2 backdrop-blur transition hover:bg-ink-15"
+            aria-label="Leave a comment">
+            <iconify-icon icon="mynaui:message-dots" width="20"></iconify-icon>
             <span id="quote-comments" class="text-sm font-medium"></span>
           </button>
-          <button type="button" class="flex cursor-pointer items-center gap-1.5" aria-label="Screenshots">
-            <iconify-icon icon="mynaui:camera" width="18"></iconify-icon>
-            <span id="quote-screenshots" class="text-sm font-medium"></span>
-          </button>
+          <div id="quote-menu-wrap" class="relative">
+            <button type="button" id="quote-menu-btn"
+              class="grid cursor-pointer place-items-center rounded-full bg-surface-70 p-2 backdrop-blur transition hover:opacity-70"
+              aria-label="More options" aria-haspopup="true" aria-expanded="false">
+              <iconify-icon icon="mynaui:dots-solid" width="20"></iconify-icon>
+            </button>
+            <div id="quote-menu"
+              class="pointer-events-none absolute right-0 z-10 w-44 scale-95 overflow-y-auto rounded-xl border border-ink-10 bg-surface-70 p-1 text-left opacity-0 shadow-lg backdrop-blur transition">
+              <button type="button" id="quote-share-btn"
+                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink transition hover:bg-ink-15">
+                <iconify-icon id="quote-share-icon" icon="mynaui:share" width="16"></iconify-icon>
+                <span id="quote-share-label">Share</span>
+              </button>
+              <button type="button" id="quote-save-btn"
+                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink transition hover:bg-ink-15">
+                <iconify-icon icon="mynaui:bookmark" width="16"></iconify-icon>
+                Save
+              </button>
+              <div class="my-1 h-px bg-ink-15" aria-hidden="true"></div>
+              <button type="button" id="quote-flag-btn"
+                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink transition hover:bg-ink-15">
+                <iconify-icon icon="mynaui:flag" width="16"></iconify-icon>
+                Report
+              </button>
+              <button type="button" id="quote-not-interested-btn"
+                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink transition hover:bg-ink-15">
+                <iconify-icon icon="mynaui:eye-off" width="16"></iconify-icon>
+                Not interested
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
 
+    <!-- Unsplash requires credit to stay visible wherever the photo is
+         shown — hidden by default, shown only while the current quote's
+         background actually came from Unsplash (see applyBackground). -->
+    <div id="quote-bg-credit"
+      class="absolute bottom-4 left-4 z-10 hidden items-center gap-1 text-[11px] text-white select-none"
+      style="text-shadow: 0 1px 3px rgba(0,0,0,.8), 0 1px 10px rgba(0,0,0,.5);">
+      <span>Photo by</span>
+      <a id="quote-bg-credit-author" href="#" target="_blank" rel="noopener noreferrer"
+        class="font-medium underline underline-offset-2"></a>
+      <span>on</span>
+      <a href="https://unsplash.com/?utm_source=youquoteit&amp;utm_medium=referral" target="_blank"
+        rel="noopener noreferrer" class="font-medium underline underline-offset-2">Unsplash</a>
+    </div>
+
     <!-- FOOTER -->
-    <footer id="quote-footer" class="relative z-10 flex items-center justify-center gap-2 px-6 py-6 sm:px-10">
+    <footer id="quote-footer" class="relative z-10 flex items-center justify-center gap-2 px-6 py-6 sm:px-10 text-ink">
       <button type="button" id="loop-btn"
-        class="relative grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Repeat this quote" aria-pressed="false">
-        <iconify-icon id="loop-icon" icon="mynaui:repeat" width="16"></iconify-icon>
-        <span id="loop-dot" class="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-accent-500 opacity-0 transition"></span>
+        <span class="relative inline-flex">
+          <iconify-icon id="loop-icon" icon="mynaui:repeat" width="16"></iconify-icon>
+          <span id="loop-dot" class="absolute -right-1.5 -top-1.5 h-1.5 w-1.5 rounded-full bg-accent opacity-0 transition"></span>
+        </span>
       </button>
 
-      <span class="mx-1 h-5 w-px bg-ink/15" aria-hidden="true"></span>
+      <span class="mx-1 h-5 w-px bg-ink-15" aria-hidden="true"></span>
 
       <button type="button" id="prev-quote-btn"
-        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Previous quote">
         <iconify-icon id="prev-quote-icon" icon="mynaui:skip-back-solid" width="16"></iconify-icon>
       </button>
 
       <button type="button" id="play-toggle-btn"
-        class="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-9 w-9 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Stop" aria-pressed="true">
         <iconify-icon id="play-toggle-icon" icon="mynaui:stop-solid" width="18"></iconify-icon>
       </button>
 
       <button type="button" id="next-quote-btn"
-        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Next quote">
         <iconify-icon id="next-quote-icon" icon="mynaui:skip-forward-solid" width="16"></iconify-icon>
       </button>
 
-      <span class="mx-1 h-5 w-px bg-ink/15" aria-hidden="true"></span>
+      <span class="mx-1 h-5 w-px bg-ink-15" aria-hidden="true"></span>
 
       <button type="button" id="screenshot-btn"
-        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Save quote as image">
-        <iconify-icon id="screenshot-icon" icon="mynaui:image-solid" width="16"></iconify-icon>
+        <iconify-icon id="screenshot-icon" icon="mynaui:camera" width="16"></iconify-icon>
       </button>
 
       <button type="button" id="fullscreen-btn"
-        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Enter fullscreen" aria-pressed="false">
         <iconify-icon id="fullscreen-icon" icon="mynaui:maximize" width="16"></iconify-icon>
       </button>
     </footer>
+
+    <button type="button" id="create-quote-btn"
+      class="fixed bottom-6 right-6 z-20 grid h-8 w-8 cursor-pointer place-items-center rounded-md bg-ink text-surface shadow-lg backdrop-blur transition hover:opacity-80"
+      aria-label="Create a quote">
+      <iconify-icon icon="mynaui:plus" width="16"></iconify-icon>
+    </button>
+
+    <div id="profile-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4 opacity-0 transition">
+      <div id="profile-modal"
+        class="flex aspect-square w-[min(92vw,85vh,64rem)] scale-95 flex-col overflow-hidden rounded-2xl border border-ink-10 bg-surface p-6 text-ink shadow-2xl transition">
+        <div class="flex shrink-0 items-start justify-between gap-4">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-ink-15 text-ink-60">
+              <iconify-icon icon="mynaui:user" width="24"></iconify-icon>
+            </span>
+            <div class="flex min-w-0 flex-col">
+              <span id="profile-menu-name" class="truncate font-display text-lg text-accent"></span>
+              <span id="profile-menu-handle" class="truncate text-sm text-ink-60"></span>
+            </div>
+          </div>
+          <div class="flex shrink-0 items-center gap-1">
+            <button type="button" id="profile-logout-btn"
+              class="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-ink transition hover:bg-ink-15"
+              aria-label="Log out">
+              <iconify-icon icon="mynaui:logout" width="18"></iconify-icon>
+            </button>
+            <button type="button" id="profile-close-btn"
+              class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:bg-ink-15"
+              aria-label="Close">
+              <iconify-icon icon="mynaui:x" width="18"></iconify-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 min-h-0 flex-1 overflow-y-auto">
+          <div id="profile-stats" class="select-none cursor-default text-left text-sm text-ink-60">
+            <span id="profile-stat-quotes" class="font-bold"></span> quotes •
+            <span id="profile-stat-appreciations" class="font-bold"></span> appreciations •
+            <span id="profile-stat-disapprovals" class="font-bold"></span> disapprovals
+          </div>
+
+          <div id="profile-tabs" class="mt-5 flex items-center gap-3">
+            <button type="button" id="profile-tab-quotes" data-tab="quotes"
+              class="profile-tab flex flex-1 cursor-pointer items-center justify-center gap-1.5 text-sm transition"
+              aria-pressed="true">
+              <iconify-icon data-icon="boxicons:quote-right-alt" data-icon-solid="boxicons:quote-right-alt-filled"
+                icon="boxicons:quote-right-alt-filled" width="16"></iconify-icon>
+              Quotes
+            </button>
+            <span class="h-4 w-px bg-ink-15" aria-hidden="true"></span>
+            <button type="button" id="profile-tab-saved" data-tab="saved"
+              class="profile-tab flex flex-1 cursor-pointer items-center justify-center gap-1.5 text-sm transition"
+              aria-pressed="false">
+              <iconify-icon data-icon="mynaui:bookmark" data-icon-solid="mynaui:bookmark-solid"
+                icon="mynaui:bookmark" width="16"></iconify-icon>
+              Saved
+            </button>
+            <span class="h-4 w-px bg-ink-15" aria-hidden="true"></span>
+            <button type="button" id="profile-tab-about" data-tab="about"
+              class="profile-tab flex flex-1 cursor-pointer items-center justify-center gap-1.5 text-sm transition"
+              aria-pressed="false">
+              <iconify-icon data-icon="mynaui:info-circle" data-icon-solid="mynaui:info-circle-solid"
+                icon="mynaui:info-circle" width="16"></iconify-icon>
+              About
+            </button>
+          </div>
+
+          <div id="profile-panel-quotes"
+            class="mt-4 flex select-none cursor-default flex-col items-center gap-2 py-6 text-center text-sm text-ink-60">
+            <iconify-icon icon="boxicons:quote-right-alt" width="28"></iconify-icon>
+            <span>Quotes you create will show up here.</span>
+          </div>
+          <div id="profile-panel-saved"
+            class="mt-4 hidden select-none cursor-default flex-col items-center gap-2 py-6 text-center text-sm text-ink-60">
+            <iconify-icon icon="mynaui:bookmark" width="28"></iconify-icon>
+            <span>Quotes you save will show up here.</span>
+          </div>
+          <div id="profile-panel-about"
+            class="mt-4 hidden select-none cursor-default flex-col items-center gap-2 py-6 text-center text-sm text-ink-60">
+            <iconify-icon icon="mynaui:info-circle" width="28"></iconify-icon>
+            <span>About is coming soon.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="categories-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4 opacity-0 transition">
+      <div id="categories-modal"
+        class="flex max-h-[85vh] w-full max-w-md scale-95 flex-col overflow-hidden rounded-2xl border border-ink-10 bg-surface text-ink shadow-2xl transition">
+        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+          <div>
+            <div class="mb-2 flex items-center justify-between">
+              <label for="categories-search-input" class="text-sm font-semibold">Search</label>
+              <span id="categories-pinned-count" class="text-xs text-ink-60">0/5 pinned</span>
+            </div>
+            <div class="relative">
+              <input type="text" id="categories-search-input" autocomplete="off"
+                placeholder="Search topics like love, life, humor…"
+                class="auth-input h-10 w-full rounded-lg border border-ink-10 bg-transparent px-3 text-sm text-ink focus:outline-none">
+              <div id="categories-search-suggestions"
+                class="pointer-events-none absolute inset-x-0 top-full z-10 mt-1 max-h-48 scale-95 overflow-y-auto rounded-lg border border-ink-10 bg-surface-70 p-1 opacity-0 shadow-lg backdrop-blur transition"></div>
+            </div>
+
+            <div id="categories-pinned-list" class="mt-3 flex flex-wrap gap-2"></div>
+            <p id="categories-pinned-empty" class="mt-3 text-xs text-ink-60">Search above to pin your first category.</p>
+          </div>
+
+          <div class="mt-6">
+            <div class="mb-2 flex items-center justify-between">
+              <span class="text-sm font-semibold">Discover</span>
+              <button type="button" id="categories-discover-refresh-btn"
+                class="grid h-7 w-7 cursor-pointer place-items-center rounded-full text-ink-60 transition hover:bg-ink-15 hover:text-ink"
+                aria-label="Shuffle suggestions">
+                <iconify-icon icon="mynaui:repeat" width="16"></iconify-icon>
+              </button>
+            </div>
+            <div id="categories-discover-list" class="flex flex-wrap gap-2"></div>
+            <p id="categories-discover-empty" class="hidden text-xs text-ink-60">No categories yet.</p>
+          </div>
+        </div>
+
+        <div class="flex shrink-0 items-center justify-end gap-3 border-t border-ink-10 px-6 py-4">
+          <button type="button" id="categories-cancel-btn"
+            class="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-ink-60 transition hover:bg-ink-15">Cancel</button>
+          <button type="button" id="categories-confirm-btn"
+            class="cursor-pointer rounded-lg bg-ink px-5 py-2.5 text-sm font-bold text-surface transition hover:opacity-80">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="auth-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4 opacity-0 transition">
+      <div id="auth-modal"
+        class="w-full max-w-sm scale-95 rounded-2xl border border-ink-10 bg-surface p-6 text-ink shadow-2xl transition">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="font-display text-xl">Join YouQuoteIt</h2>
+            <p class="mt-1 text-sm text-ink-60">Sign up or log in to create your own quote.</p>
+          </div>
+          <button type="button" id="auth-close-btn"
+            class="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-ink-15"
+            aria-label="Close">
+            <iconify-icon icon="mynaui:x" width="18"></iconify-icon>
+          </button>
+        </div>
+
+        <div id="auth-tabs" class="mt-5 flex gap-1 rounded-full border border-ink-10 p-1">
+          <button type="button" id="auth-tab-signup"
+            class="auth-tab flex-1 cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition"
+            aria-pressed="true">Sign Up</button>
+          <button type="button" id="auth-tab-login"
+            class="auth-tab flex-1 cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition"
+            aria-pressed="false">Log In</button>
+        </div>
+
+        <form id="auth-form" class="mt-5 flex flex-col gap-3" novalidate>
+          <div id="auth-signup-fields" class="flex flex-col gap-3">
+            <div>
+              <input type="text" id="auth-username"
+                class="auth-input h-12 w-full rounded-lg border border-ink-10 bg-transparent px-3 text-sm text-ink focus:outline-none"
+                placeholder="Username" autocomplete="username" required minlength="2"
+                pattern="^(?!\d+$)[A-Za-z0-9_]+$"
+                title="At least 2 characters: letters, numbers and underscores only, not all digits.">
+              <p id="auth-username-hint" class="hidden items-center gap-1.5 px-1 pt-1 text-xs">
+                <iconify-icon id="auth-username-hint-icon" width="14"></iconify-icon>
+                <span id="auth-username-hint-text"></span>
+              </p>
+            </div>
+            <input type="text" id="auth-author-name"
+              class="auth-input h-12 w-full rounded-lg border border-ink-10 bg-transparent px-3 text-sm capitalize text-ink focus:outline-none"
+              placeholder="Author's name" autocomplete="name" required maxlength="20"
+              pattern="^\S+(?:\s+\S+){0,3}$" title="Up to 4 words, 20 characters total.">
+          </div>
+          <input type="email" id="auth-email"
+            class="auth-input h-12 rounded-lg border border-ink-10 bg-transparent px-3 text-sm text-ink focus:outline-none"
+            placeholder="Email" autocomplete="email" required>
+          <div class="relative">
+            <input type="password" id="auth-password"
+              class="auth-input h-12 w-full rounded-lg border border-ink-10 bg-transparent px-3 pr-11 text-sm text-ink focus:outline-none"
+              placeholder="Password" autocomplete="new-password" required>
+            <button type="button" id="auth-password-toggle"
+              class="absolute inset-y-0 right-0 grid w-11 cursor-pointer place-items-center text-ink-60 transition hover:text-ink"
+              aria-label="Show password" aria-pressed="false" tabindex="-1">
+              <iconify-icon id="auth-password-toggle-icon" icon="mynaui:eye" width="18"></iconify-icon>
+            </button>
+          </div>
+          <button type="button" id="auth-forgot-btn"
+            class="hidden cursor-pointer self-end text-xs font-medium text-ink transition hover:underline">Forgot your
+            password?</button>
+          <ul id="auth-password-requirements" class="hidden grid grid-cols-2 gap-x-3 gap-y-1 px-1 text-xs">
+            <li id="auth-req-length" class="flex items-center gap-1.5 text-ink-60">
+              <iconify-icon icon="mynaui:x" width="14"></iconify-icon><span>8+ characters</span>
+            </li>
+            <li id="auth-req-lower" class="flex items-center gap-1.5 text-ink-60">
+              <iconify-icon icon="mynaui:x" width="14"></iconify-icon><span>2+ lowercase</span>
+            </li>
+            <li id="auth-req-upper" class="flex items-center gap-1.5 text-ink-60">
+              <iconify-icon icon="mynaui:x" width="14"></iconify-icon><span>2+ uppercase</span>
+            </li>
+            <li id="auth-req-digit" class="flex items-center gap-1.5 text-ink-60">
+              <iconify-icon icon="mynaui:x" width="14"></iconify-icon><span>2+ numbers</span>
+            </li>
+            <li id="auth-req-special" class="flex items-center gap-1.5 text-ink-60">
+              <iconify-icon icon="mynaui:x" width="14"></iconify-icon><span>2+ special chars</span>
+            </li>
+          </ul>
+          <label id="auth-terms-row" class="flex cursor-pointer items-start gap-2 text-xs text-ink-60">
+            <input type="checkbox" id="auth-terms" required class="sr-only">
+            <iconify-icon id="auth-terms-icon" icon="mynaui:square" width="16" class="mt-0.5 shrink-0"></iconify-icon>
+            <span>I agree to the <span class="font-medium text-ink">Terms and Conditions</span></span>
+          </label>
+          <button type="submit" id="auth-submit-btn" disabled
+            class="mt-1 flex h-12 cursor-pointer items-center justify-center rounded-lg bg-ink px-4 text-sm font-bold text-surface transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40">Create
+            Account</button>
+        </form>
+
+        <div class="my-4 flex items-center gap-3 text-xs text-ink-60">
+          <span class="h-px flex-1 bg-ink-15" aria-hidden="true"></span>
+          or
+          <span class="h-px flex-1 bg-ink-15" aria-hidden="true"></span>
+        </div>
+
+        <button type="button" id="auth-google-btn"
+          class="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-ink-10 bg-transparent px-4 text-sm font-semibold text-ink transition hover:bg-ink-15">
+          <iconify-icon icon="logos:google-icon" width="18"></iconify-icon>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <div id="comments-backdrop"
+      class="pointer-events-none fixed inset-0 z-30 flex items-end justify-center bg-black/40 opacity-0 transition sm:items-center sm:justify-end">
+      <div id="comments-panel"
+        class="flex h-[82vh] w-full flex-col rounded-t-2xl bg-surface text-ink shadow-2xl transition sm:max-w-md sm:rounded-none">
+        <div class="flex items-center justify-between border-b border-ink-10 px-5 py-4">
+          <div class="flex items-center gap-2">
+            <span class="font-display text-lg">Comments</span>
+            <span id="comments-panel-count"
+              class="rounded-full bg-ink-15 px-2 py-0.5 text-xs font-medium text-ink"></span>
+          </div>
+          <button type="button" id="comments-close-btn"
+            class="grid h-8 w-8 cursor-pointer place-items-center rounded-full transition hover:bg-ink-15"
+            aria-label="Close comments">
+            <iconify-icon icon="mynaui:x" width="18"></iconify-icon>
+          </button>
+        </div>
+        <div id="comments-list" class="hidden flex-1 flex-col gap-5 overflow-y-auto px-5 py-4"></div>
+        <div id="comments-empty-state"
+          class="flex flex-1 select-none cursor-default flex-col items-center justify-center gap-2 px-5 text-center text-sm text-ink-60">
+          <iconify-icon icon="mynaui:message-dots" width="32"></iconify-icon>
+          <span>Be the first to share your thoughts!</span>
+        </div>
+        <div class="border-t border-ink-10 px-5 py-4">
+          <div id="comment-composer"
+            class="flex flex-col overflow-hidden rounded-lg border border-ink-10 transition focus-within:ring-1 focus-within:ring-ink-10">
+            <textarea id="comment-input" rows="2" maxlength="280" placeholder="Add a comment..."
+              class="comment-input-field resize-none border-0 bg-transparent px-3 py-2 text-sm text-ink focus:outline-none"></textarea>
+            <div class="flex items-center justify-between px-2 py-1.5">
+              <span id="comment-char-count" class="select-none px-1 text-xs text-ink-60">0/280</span>
+              <button type="button" id="comment-submit-btn" disabled
+                class="cursor-pointer rounded-md bg-ink px-4 py-2 text-xs font-bold text-surface transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40">
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="create-quote-backdrop"
+      class="pointer-events-none fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4 opacity-0 transition">
+      <div id="create-quote-modal"
+        class="flex max-h-[92vh] w-full max-w-5xl scale-95 flex-col overflow-hidden rounded-2xl border border-ink-10 bg-surface text-ink shadow-2xl transition sm:h-[min(600px,85vh,45vw)] sm:flex-row">
+
+        <div id="cq-preview-wrap"
+          class="flex shrink-0 items-center justify-center self-center bg-ink-15 sm:w-[min(600px,85vh,45vw)] sm:self-auto">
+          <div id="cq-preview"
+            class="quote-stage--fallback relative flex aspect-square w-full max-w-[340px] flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center ring-1 ring-ink-10 sm:h-full sm:w-full sm:max-w-none">
+            <button type="button" id="cq-reposition-btn"
+              class="absolute right-2 top-2 z-20 hidden h-8 w-8 cursor-pointer place-items-center rounded-md bg-surface-70 text-ink backdrop-blur transition hover:opacity-80"
+              aria-label="Reposition background image" aria-pressed="false">
+              <iconify-icon id="cq-reposition-icon" icon="mynaui:move" width="16"></iconify-icon>
+            </button>
+
+            <div id="cq-preview-content" class="relative flex w-full flex-col items-center">
+              <div id="cq-preview-author-row"
+                class="absolute bottom-full left-1/2 mb-3 flex w-max -translate-x-1/2 items-center gap-2 select-none cursor-default">
+                <span
+                  class="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-surface text-ink-60 ring-1 ring-ink-10">
+                  <iconify-icon icon="mynaui:user" width="16"></iconify-icon>
+                </span>
+                <div class="flex flex-col items-start text-left">
+                  <span id="cq-preview-author" class="font-display text-base text-accent"></span>
+                  <span id="cq-preview-author-meta" class="text-[10px] text-ink">1 quotes &bull; 0 appreciations</span>
+                </div>
+              </div>
+
+              <p id="cq-preview-text"
+                class="select-none cursor-default break-words font-display leading-tight text-ink-60"
+                style="font-size: 1.5rem;">Your quote will appear here</p>
+
+              <div id="cq-preview-stats"
+                class="absolute top-full left-1/2 mt-3 flex -translate-x-1/2 items-center gap-2 text-ink select-none cursor-default">
+                <div id="cq-preview-vote" class="flex items-center overflow-hidden rounded-full border border-ink-10 bg-surface-70 backdrop-blur">
+                  <span id="cq-preview-like" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
+                    <iconify-icon icon="mynaui:like" width="14"></iconify-icon>0
+                  </span>
+                  <span id="cq-preview-vote-divider" class="h-4 w-px bg-ink-15" aria-hidden="true"></span>
+                  <span id="cq-preview-dislike" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium">
+                    <iconify-icon icon="mynaui:dislike" width="14"></iconify-icon>0
+                  </span>
+                </div>
+                <span id="cq-preview-comments"
+                  class="flex items-center gap-1 rounded-full border border-ink-10 bg-surface-70 px-2.5 py-1 text-xs font-medium backdrop-blur">
+                  <iconify-icon icon="mynaui:message-dots" width="14"></iconify-icon>0
+                </span>
+              </div>
+            </div>
+
+            <div id="cq-preview-bg-credit"
+              class="absolute bottom-2 left-2 z-10 hidden items-center gap-1 text-[9px] text-white select-none"
+              style="text-shadow: 0 1px 3px rgba(0,0,0,.8), 0 1px 10px rgba(0,0,0,.5);">
+              <span>Photo by</span>
+              <a id="cq-preview-bg-credit-author" href="#" target="_blank" rel="noopener noreferrer"
+                class="font-medium underline underline-offset-2"></a>
+              <span>on</span>
+              <a href="https://unsplash.com/?utm_source=youquoteit&amp;utm_medium=referral" target="_blank"
+                rel="noopener noreferrer" class="font-medium underline underline-offset-2">Unsplash</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-1 flex-col overflow-hidden">
+          <div class="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-5">
+            <div>
+              <div
+                class="flex flex-col overflow-hidden rounded-lg border border-ink-10 transition focus-within:ring-1 focus-within:ring-ink-10">
+                <textarea id="cq-text" rows="4" placeholder="What's your quote?"
+                  class="comment-input-field resize-none border-0 bg-transparent px-3 py-2 text-sm text-ink focus:outline-none"></textarea>
+                <div class="flex items-center justify-end px-2 py-1.5">
+                  <span id="cq-char-count" class="select-none px-1 text-xs text-ink-60">0/110</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div id="cq-bg-tabs" class="mb-3 flex items-center gap-3">
+                <button type="button" id="cq-bg-tab-upload"
+                  class="cq-bg-tab flex flex-1 cursor-pointer items-center justify-center gap-1.5 text-sm transition"
+                  aria-pressed="true">
+                  <iconify-icon icon="mynaui:upload" width="16"></iconify-icon>
+                  Upload
+                </button>
+                <span class="h-4 w-px bg-ink-15" aria-hidden="true"></span>
+                <button type="button" id="cq-bg-tab-unsplash"
+                  class="cq-bg-tab flex flex-1 cursor-pointer items-center justify-center gap-1.5 text-sm transition"
+                  aria-pressed="false">
+                  <iconify-icon icon="mynaui:sparkles" width="16"></iconify-icon>
+                  Unsplash
+                </button>
+              </div>
+
+              <div id="cq-bg-panel-upload" class="flex flex-col gap-3">
+                <input type="file" id="cq-bg-file" accept="image/*" class="hidden">
+                <div id="cq-bg-dropzone"
+                  class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-ink-10 px-4 py-6 text-center text-sm text-ink-60 transition hover:bg-ink-15">
+                  <iconify-icon icon="mynaui:upload" width="24"></iconify-icon>
+                  <span>Click to upload an image from your device</span>
+                </div>
+                <div id="cq-bg-preview-row" class="hidden items-center gap-3">
+                  <img id="cq-bg-preview-thumb"
+                    class="h-14 w-14 shrink-0 rounded-lg object-cover ring-1 ring-ink-10" alt="">
+                  <span id="cq-bg-filename" class="flex-1 truncate text-sm text-ink-60"></span>
+                  <button type="button" id="cq-bg-remove-btn"
+                    class="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-ink-15"
+                    aria-label="Remove background image">
+                    <iconify-icon icon="mynaui:trash" width="16"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div id="cq-bg-panel-unsplash" class="hidden flex-col gap-3">
+                <div class="flex gap-2">
+                  <input type="text" id="cq-unsplash-search" placeholder="Search Unsplash photos…"
+                    class="auth-input h-10 flex-1 rounded-lg border border-ink-10 bg-transparent px-3 text-sm text-ink focus:outline-none">
+                  <button type="button" id="cq-unsplash-search-btn"
+                    class="cursor-pointer rounded-lg border border-ink-10 px-4 text-sm font-medium transition hover:bg-ink-15">Search</button>
+                </div>
+                <div id="cq-unsplash-status"
+                  class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-ink-10 px-4 py-6 text-center text-sm text-ink-60">
+                  <iconify-icon icon="mynaui:sparkles" width="24"></iconify-icon>
+                  <span>Search for a photo to use as your background</span>
+                </div>
+                <div id="cq-unsplash-results" class="hidden grid max-h-72 grid-cols-3 gap-2 overflow-y-auto pr-1"></div>
+                <button type="button" id="cq-unsplash-load-more"
+                  class="hidden cursor-pointer self-center rounded-full border border-ink-10 px-4 py-1.5 text-xs font-medium transition hover:bg-ink-15">Load
+                  more</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="cq-hashtag-input" class="mb-2 block text-sm font-semibold">Hashtags</label>
+              <div class="relative">
+                <input type="text" id="cq-hashtag-input" placeholder="Search or add a hashtag…" maxlength="24"
+                  class="auth-input h-10 w-full rounded-lg border border-ink-10 bg-transparent px-3 text-sm text-ink focus:outline-none">
+                <div id="cq-hashtag-suggestions"
+                  class="pointer-events-none absolute inset-x-0 top-full z-10 mt-1 max-h-40 scale-95 overflow-y-auto rounded-lg border border-ink-10 bg-surface-70 p-1 opacity-0 shadow-lg backdrop-blur transition"></div>
+              </div>
+              <div id="cq-hashtag-chips" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+
+            <div>
+              <span class="mb-2 block text-sm font-semibold">Preferences</span>
+              <div class="flex flex-col rounded-lg border border-ink-10">
+                <label class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3">
+                  <span class="text-sm">Show appreciation count</span>
+                  <button type="button" id="cq-pref-appreciations"
+                    class="cq-toggle relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-ink transition"
+                    role="switch" aria-checked="true">
+                    <span
+                      class="cq-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-surface shadow transition"></span>
+                  </button>
+                </label>
+                <div class="h-px bg-ink-15" aria-hidden="true"></div>
+                <label class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3">
+                  <span class="text-sm">Show disapproval count</span>
+                  <button type="button" id="cq-pref-disapprovals"
+                    class="cq-toggle relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-ink transition"
+                    role="switch" aria-checked="true">
+                    <span
+                      class="cq-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-surface shadow transition"></span>
+                  </button>
+                </label>
+                <div class="h-px bg-ink-15" aria-hidden="true"></div>
+                <label class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3">
+                  <span class="text-sm">Allow comments</span>
+                  <button type="button" id="cq-pref-comments"
+                    class="cq-toggle relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-ink transition"
+                    role="switch" aria-checked="true">
+                    <span
+                      class="cq-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-surface shadow transition"></span>
+                  </button>
+                </label>
+                <div class="h-px bg-ink-15" aria-hidden="true"></div>
+                <label class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3">
+                  <span class="text-sm">Allow snapshots</span>
+                  <button type="button" id="cq-pref-snapshots"
+                    class="cq-toggle relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-ink transition"
+                    role="switch" aria-checked="true">
+                    <span
+                      class="cq-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-surface shadow transition"></span>
+                  </button>
+                </label>
+                <div class="h-px bg-ink-15" aria-hidden="true"></div>
+                <label class="flex cursor-pointer items-center justify-between gap-4 px-4 py-3">
+                  <span class="text-sm">Mature audience</span>
+                  <button type="button" id="cq-pref-mature"
+                    class="cq-toggle relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-ink-15 transition"
+                    role="switch" aria-checked="false">
+                    <span
+                      class="cq-toggle-thumb absolute left-0.5 top-0.5 h-5 w-5 translate-x-0 rounded-full bg-surface shadow transition"></span>
+                  </button>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 border-t border-ink-10 px-6 py-4">
+            <button type="button" id="cq-cancel-btn"
+              class="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-ink-60 transition hover:bg-ink-15">Cancel</button>
+            <button type="button" id="cq-publish-btn" disabled
+              class="cursor-pointer rounded-lg bg-ink px-5 py-2.5 text-sm font-bold text-surface transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40">Publish</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-container"
+      class="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex flex-col items-center gap-2 px-4"
+      aria-live="polite"></div>
   </div>
 
   <script type="application/json" id="quotes-data"><%- JSON.stringify(quotes) %></script>
+  <script type="application/json" id="current-user-data"><%- JSON.stringify(currentUser) %></script>
   <script src="/js/app.js" defer></script>
 </body>
 </html>

@@ -5,3 +5,5 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 public/output.css
+public/uploads/
+dev_resources/

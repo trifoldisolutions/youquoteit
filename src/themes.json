@@ -1,0 +1,42 @@
+{
+    "default": {
+        "background": "#F8F8F8",
+        "ink": "#090909",
+        "accent": "#0064B2"
+    },
+    "dark_default": {
+        "background": "#090909",
+        "ink": "#F8F8F8",
+        "accent": "#0064B2"
+    },
+    "buttercup": {
+        "background": "#0E1600",
+        "ink": "#EFA800",
+        "accent": "#F1001F"
+    },
+    "royal": {
+        "background": "#FFF0DD",
+        "ink": "#6279F4",
+        "accent": "#2EC1B8"
+    },
+    "dazzle": {
+        "background": "#DDF9FF",
+        "ink": "#FF4ACC",
+        "accent": "#6D85FF"
+    },
+    "blackn": {
+        "background": "#090909",
+        "ink": "#F8F8F8",
+        "accent": "#353434"
+    },
+    "aqua" : {
+        "background": "#01111B",
+        "ink": "#00F0FF",
+        "accent": "#E98607"
+    },
+    "watermelon": {
+        "background": "#181818",
+        "ink": "#5FB887",
+        "accent": "#FF196C"
+    }
+}
