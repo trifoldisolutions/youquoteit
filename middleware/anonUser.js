@@ -7,10 +7,10 @@ const MAX_AGE_MS = 6 * 60 * 60 * 1000; // mirrors AnonUser's TTL index
 // Identifies first-time visitors, creating an AnonUser doc + cookie for them.
 // Every visit touches updatedAt, which both the doc's TTL index and the
 // cookie's max-age key off — so activity within the window keeps sliding it.
-// Mounted once globally in server.js; skips internal-only facades so admin/
-// dev-resources traffic doesn't pollute visitor tracking.
+// Mounted once globally in server.js; skips the internal-only admin facade so
+// its traffic doesn't pollute visitor tracking.
 async function anonUser(req, res, next) {
-  if (req.path.startsWith('/admin') || req.path.startsWith('/dev-resources')) {
+  if (req.path.startsWith('/admin')) {
     return next();
   }
 

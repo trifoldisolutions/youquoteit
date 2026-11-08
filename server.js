@@ -11,13 +11,12 @@ const currentUser = require('./middleware/currentUser');
 const publicRoutes = require('./routes/public');
 const appRoutes = require('./routes/app');
 const adminRoutes = require('./routes/admin');
-const tasksRoutes = require('./routes/tasks');
 
 const app = express();
 const PORT = process.env.PORT || 3008;
 
 app.set('view engine', 'ejs');
-app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'dev_resources')]);
+app.set('views', path.join(__dirname, 'views'));
 
 // Signed with SESSION_SECRET so the login-session cookie (see
 // middleware/currentUser.js) can't be forged by the client.
@@ -37,7 +36,6 @@ const facades = [
   { name: 'Public', mount: '/', router: publicRoutes },
   { name: 'App', mount: '/app', router: appRoutes },
   { name: 'Admin', mount: '/admin', router: adminRoutes },
-  { name: 'Dev Resources', mount: '/dev-resources', router: tasksRoutes },
 ];
 
 facades.forEach(({ mount, router }) => app.use(mount, router));
