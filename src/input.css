@@ -10,7 +10,7 @@
 }
 
 /* ---------- Themes ---------- */
-/* Sourced from src/themes.json — each theme is exactly 3 tokens:
+/* Sourced from config/themes.json — each theme is exactly 3 tokens:
    background (page bg), ink (text) and accent (author name, brand
    dot, likes, etc.). Muted/secondary text is a plain rgba() built from
    the *-rgb triplet below, not a Tailwind opacity modifier — see the

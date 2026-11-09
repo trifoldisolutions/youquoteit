@@ -2,7 +2,7 @@
   'use strict';
 
   var THEME_KEY = 'yqi-theme';
-  // Same order as src/themes.json (and the [data-theme] blocks in
+  // Same order as config/themes.json (and the [data-theme] blocks in
   // src/input.css) — both the (not yet wired up) .theme-dot menu and the
   // double-click cycler below step through this order.
   var THEMES = ['default', 'dark_default', 'buttercup', 'royal', 'dazzle', 'blackn', 'aqua', 'watermelon'];

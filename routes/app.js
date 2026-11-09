@@ -76,7 +76,7 @@ const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
 const UNSPLASH_API_BASE = 'https://api.unsplash.com';
 const UNSPLASH_UTM = 'utm_source=youquoteit&utm_medium=referral';
 
-// Mirrors src/themes.json, also reflected in the [data-theme] blocks in src/input.css.
+// Mirrors config/themes.json, also reflected in the [data-theme] blocks in src/input.css.
 const THEMES = [
   { id: 'default', name: 'Default' },
   { id: 'dark_default', name: 'Dark Default' },
@@ -229,7 +229,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-  res.render('app/login', { title: 'Log In / Sign Up — YouQuoteIt' });
+  res.render('app/auth/login', { title: 'Log In / Sign Up — YouQuoteIt' });
 });
 
 router.get('/quotes', (req, res) => {

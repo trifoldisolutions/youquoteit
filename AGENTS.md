@@ -23,7 +23,7 @@ youquoteit/
 ├── AGENTS.md
 ├── package.json, .env, .env.example, .gitignore, youquoteit.vbs
 ├── .vscode/tasks.json   Runs `npm run tw` and `npm run dev` on folder open
-├── config/              Constants and settings: limits, pricing, brand
+├── config/              Constants and settings: limits, pricing, brand. themes.json lists the selectable themes, mirrored in routes/app.js and src/input.css
 ├── models/              Mongoose models, one per file
 ├── routes/
 │   ├── public.js        Public pages, mounted at /
@@ -39,8 +39,6 @@ youquoteit/
 │   ├── app/             App pages, with sign-in pages in app/auth/
 │   └── admin/           Admin pages, with its own partials in admin/partials/
 ├── src/input.css        Tailwind source, the only CSS file to edit
-├── src/themes.json      The selectable themes, mirrored in routes/app.js and src/input.css
-├── src/imgs/            Design reference images
 ├── public/
 │   ├── output.css       Built by Tailwind: never edit or commit it
 │   ├── js/              Browser scripts
